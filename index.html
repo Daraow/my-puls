@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Для тебя ❤️</title>
+<style>
+  body { margin:0; overflow:hidden; background:#000; }
+  canvas { display:block; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+// ============== НАСТРОЙКИ ==============
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let w, h, time = 0;
+let stage = 0;
+
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const neon = '#00ffff';
+
+function drawHuggingCouple(x, y, scale = 1) {
+  ctx.strokeStyle = neon;
+  ctx.lineWidth = 7 * scale;
+  ctx.shadowBlur = 35;
+  ctx.shadowColor = neon;
+
+  ctx.beginPath();
+  ctx.arc(x - 35*scale, y - 45*scale, 22*scale, 0, Math.PI*2);
+  ctx.moveTo(x - 35*scale, y - 23*scale);
+  ctx.lineTo(x - 35*scale, y + 35*scale);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(x + 35*scale, y - 45*scale, 22*scale, 0, Math.PI*2);
+  ctx.moveTo(x + 35*scale, y - 23*scale);
+  ctx.lineTo(x + 35*scale, y + 35*scale);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x - 35*scale, y - 5*scale);
+  ctx.quadraticCurveTo(x - 10*scale, y - 25*scale, x + 25*scale, y - 8*scale);
+  ctx.moveTo(x + 35*scale, y - 5*scale);
+  ctx.quadraticCurveTo(x + 12*scale, y - 22*scale, x - 20*scale, y - 8*scale);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x - 35*scale, y + 35*scale);
+  ctx.lineTo(x - 45*scale, y + 75*scale);
+  ctx.moveTo(x - 20*scale, y + 35*scale);
+  ctx.lineTo(x - 25*scale, y + 72*scale);
+  ctx.moveTo(x + 35*scale, y + 35*scale);
+  ctx.lineTo(x + 48*scale, y + 75*scale);
+  ctx.moveTo(x + 20*scale, y + 35*scale);
+  ctx.lineTo(x + 28*scale, y + 72*scale);
+  ctx.stroke();
+}
+
+function drawHeart(x, y, size) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(size/40, size/40);
+  ctx.fillStyle = neon;
+  ctx.shadowBlur = 55;
+  ctx.shadowColor = neon;
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.bezierCurveTo(-22, -12, -42, 12, 0, 42);
+  ctx.bezierCurveTo(42, 12, 22, -12, 0, 18);
+  ctx.fill();
+  ctx.restore();
+}
+
+function animate() {
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  ctx.fillRect(0, 0, w, h);
+  time += 0.016;
+
+  if (stage === 0) drawIntro();
+  else if (stage === 1) drawZoomIn();
+  else if (stage === 2) drawMemories();
+  else if (stage === 3) drawFastHeart();
+  else if (stage === 4) drawBlack();
+  else if (stage === 5) drawECG();
+
+  requestAnimationFrame(animate);
+}
+
+function drawIntro() {
+  const cx = w/2, cy = h/2 - 40;
+  ctx.strokeStyle = neon;
+  ctx.lineWidth = 8;
+  ctx.shadowBlur = 30;
+  ctx.shadowColor = neon;
+  
+  ctx.beginPath();
+  ctx.arc(cx, cy-70, 32, 0, Math.PI*2);
+  ctx.moveTo(cx, cy-38);
+  ctx.lineTo(cx, cy+65);
+  ctx.stroke();
+
+  const armSway = Math.sin(time*1.8)*8;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy-15);
+  ctx.lineTo(cx-55, cy+25 + armSway);
+  ctx.moveTo(cx, cy-15);
+  ctx.lineTo(cx+55, cy+25 - armSway);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy+65);
+  ctx.lineTo(cx-28, cy+130);
+  ctx.moveTo(cx, cy+65);
+  ctx.lineTo(cx+28, cy+130);
+  ctx.stroke();
+
+  const heartScale = 1 + Math.sin(time*1.6)*0.13;
+  drawHeart(cx, cy + 18, 32 * heartScale);
+
+  if (time > 4) {
+    const alpha = Math.min(1, (time-4)/1.8);
+    ctx.globalAlpha = alpha;
+    drawHuggingCouple(cx, cy + 38, 0.78);
+    ctx.globalAlpha = 1;
+  }
+  
+  if (time > 10) stage = 1;
+}
+
+let zoom = 1;
+function drawZoomIn() {
+  zoom = Math.min(zoom + 0.009, 3.6);
+  ctx.save();
+  ctx.translate(w/2, h/2);
+  ctx.scale(zoom, zoom);
+  ctx.translate(-w/2, -h/2 + 70);
+  drawIntro();
+  ctx.restore();
+  if (zoom > 3.3) stage = 2;
+}
+
+function drawMemories() {
+  const cx = w/2, cy = h/2 - 50;
+  ctx.strokeStyle = neon;
+  ctx.lineWidth = 7;
+  ctx.shadowBlur = 40;
+  
+  ctx.beginPath();
+  ctx.arc(cx, cy, 48, 0, Math.PI*2);
+  ctx.stroke();
+
+  const eyePulse = 13 + Math.sin(time*9)*4;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(cx-18, cy-8, eyePulse, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+18, cy-8, eyePulse, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(cx-18, cy-8, 6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+18, cy-8, 6, 0, Math.PI*2); ctx.fill();
+
+  const heartScale = 1 + Math.sin(time*13)*0.28;
+  drawHeart(cx, cy + 75, 52 * heartScale);
+  
+  if (time > 19) stage = 3;
+}
+
+function drawFastHeart() {
+  ctx.save();
+  ctx.translate(w/2, h/2);
+  const scale = 1 + Math.sin(time*19)*0.45;
+  drawHeart(0, 0, 135 * scale);
+  ctx.restore();
+  if (time > 24) stage = 4;
+}
+
+let blackTime = 0;
+function drawBlack() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0,0,w,h);
+  blackTime++;
+  if (blackTime > 100) stage = 5;
+}
+
+let ecgPhase = 0;
+function drawECG() {
+  ctx.strokeStyle = neon;
+  ctx.lineWidth = 6;
+  ctx.shadowBlur = 30;
+  ctx.shadowColor = neon;
+  
+  ctx.beginPath();
+  ctx.moveTo(0, h*0.55);
+  for (let x = 0; x < w+50; x += 4) {
+    let y = h*0.55;
+    const p = (x + ecgPhase) % (w + 300);
+    if (p > 180 && p < 260) y -= 65;
+    else if (p > 320 && p < 380) y -= 95;
+    else if (p > 420 && p < 480) y += 40;
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  if (ecgPhase > 900) {
+    ctx.globalAlpha = Math.min(1, (ecgPhase-900)/120);
+    drawHeart(w*0.82, h*0.65, 95);
+    ctx.globalAlpha = 1;
+  }
+  ecgPhase += 14;
+}
+
+animate();
+</script>
+</body>
+</html>
